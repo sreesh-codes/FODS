@@ -1,0 +1,46 @@
+# Data files
+raw/
+processed/
+cache/
+figures/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large data files
+*.parquet
+*.csv
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Exclude specific large files but keep structure
+!.gitkeep
