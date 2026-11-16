@@ -2,7 +2,6 @@
 raw/
 processed/
 cache/
-figures/
 
 # Python cache
 __pycache__/
