@@ -75,3 +75,86 @@ TICKER_RENAMES = {
     "GOOGL": "GOOGL",  # exists
     "GOOG": "GOOG",  # exists
 }
+
+# ============================================================================
+# MODELING PARAMETERS (Ground Rules)
+# ============================================================================
+
+# Random seeds for reproducibility
+RANDOM_SEEDS = [42, 123, 456, 789, 1011]  # 5 seeds for deep learning
+RANDOM_SEED = RANDOM_SEEDS[0]  # Default seed
+
+# Walk-forward validation parameters
+WF_START_YEAR = 2018  # First test quarter: 2018Q1
+WF_END_YEAR = 2022    # Last test quarter: 2022Q4
+WF_EMBARGO_DAYS = 20  # Trading days between last train t0 and first test t0
+WF_VALIDATION_QUARTERS = 4  # Use last 4 quarters of training for hyperparameter tuning
+
+# Holdout test set (run ONCE at the end)
+HOLDOUT_START = "2023-01-01"
+HOLDOUT_END = "2024-12-31"
+
+# Model targets
+PRIMARY_TARGET = "car_2_5_binary"  # CAR[+2,+5] up/down
+SECONDARY_TARGET = "car_2_20_binary"  # CAR[+2,+20] up/down
+REGRESSION_TARGET = "car_abn_2_20"  # For explanatory regressions
+
+# Feature groups (for no-look-ahead validation)
+PRE_EVENT_FEATURES = [
+    # SUE and earnings
+    'sue_wins_std',
+    # Size and momentum
+    'price_tminus1_wins_std', 'momentum_12_1_wins_std',
+    # Volatility
+    'rv_21d_wins_std',
+    # Timing and sector (dummies handled separately)
+    'timing_bmo',
+]
+
+# Categorical features (one-hot encoded)
+SECTOR_DUMMIES = ['sector_Consumer Discretionary', 'sector_Consumer Staples',
+                  'sector_Energy', 'sector_Financials', 'sector_Health Care',
+                  'sector_Industrials', 'sector_Information Technology',
+                  'sector_Materials', 'sector_Real Estate', 'sector_Utilities']
+SIZE_DUMMIES = ['size_medium', 'size_small']
+
+# All model features
+ALL_FEATURES = PRE_EVENT_FEATURES + SECTOR_DUMMIES + SIZE_DUMMIES
+
+# Clustering for standard errors
+CLUSTER_VAR = 't0'  # Cluster by announcement date
+FIRM_CLUSTER_VAR = 'ticker'  # For two-way clustering
+
+# Transaction costs (basis points per side)
+STOCK_COST_LOW = 10   # 10 bps for liquid large caps
+STOCK_COST_HIGH = 20  # 20 bps for higher cost scenario
+
+# Model registry
+MODEL_REGISTRY_PATH = LOGS_DIR / "model_registry.csv"
+
+# Deep learning parameters
+DL_BATCH_SIZE = 64
+DL_MAX_EPOCHS = 100
+DL_PATIENCE = 10  # Early stopping patience
+DL_LEARNING_RATE = 0.001
+
+# Sequence model parameters
+SEQ_LENGTH = 60  # Days from t-60 to t-1
+SEQ_FEATURES = ['ret_abn', 'log_vol_abn', 'rv', 'iv']  # Per-day features
+
+# Tree model parameters (initial search grid - will be tuned)
+LGBM_PARAMS = {
+    'objective': 'binary',
+    'metric': 'auc',
+    'boosting_type': 'gbdt',
+    'verbose': -1,
+    'random_state': RANDOM_SEED,
+    'monotone_constraints': {0: 1},  # SUE must be monotone increasing
+}
+
+# Metrics to track
+METRICS = ['auc', 'log_loss', 'brier_score', 'rank_ic']
+
+# Leakage test thresholds
+LEAKAGE_AUC_THRESHOLD = 0.55  # Shuffled labels should get AUC ~0.50 ± 0.05
+DRIFT_AUC_THRESHOLD = 0.60    # Above this, check for leakage before continuing
